@@ -150,4 +150,19 @@ class SipsTest extends TestCase
         $response->assertRedirect(route('classifications.index'));
         $this->assertDatabaseHas('classifications', ['department' => 'knr', 'code' => 'TAG']);
     }
+
+    public function test_can_export_letters_to_excel()
+    {
+        \Maatwebsite\Excel\Facades\Excel::fake();
+
+        $response = $this->actingAs($this->user)
+            ->get(route('letters.export-excel'));
+
+        $response->assertStatus(200);
+
+        \Maatwebsite\Excel\Facades\Excel::assertDownloaded('SIPS_Offline_Tracker.xlsx', function (\App\Exports\LettersExport $export) {
+            // Check that the export has the correct number of sheets (1 Dashboard + 3 Data + 3 Master = 7)
+            return count($export->sheets()) === 7;
+        });
+    }
 }
