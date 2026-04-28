@@ -24,11 +24,19 @@ class LetterController extends Controller
     public function index()
     {
         return Inertia::render('Letters/Index', [
-            'letters' => Letter::with(['documentType', 'classification', 'subClassification'])->latest()->get(),
-            'documentTypes' => DocumentType::all(),
-            'classifications' => Classification::all(),
-            'subClassifications' => SubClassification::all(),
-            'recipients' => Recipient::all(),
+            'letters' => Letter::with(['documentType', 'classification', 'subClassification'])->latest()->paginate(100),
+            'documentTypes' => \Illuminate\Support\Facades\Cache::remember('document_types_all', 60*24, function() {
+                return DocumentType::all()->values()->toArray();
+            }),
+            'classifications' => \Illuminate\Support\Facades\Cache::remember('classifications_all', 60*24, function() {
+                return Classification::all()->values()->toArray();
+            }),
+            'subClassifications' => \Illuminate\Support\Facades\Cache::remember('sub_classifications_all', 60*24, function() {
+                return SubClassification::all()->values()->toArray();
+            }),
+            'recipients' => \Illuminate\Support\Facades\Cache::remember('recipients_all', 60*24, function() {
+                return Recipient::all()->values()->toArray();
+            }),
         ]);
     }
 
@@ -41,7 +49,7 @@ class LetterController extends Controller
             'classification_id' => 'required|exists:classifications,id',
             'sub_classification_id' => 'required|exists:sub_classifications,id',
             'recipient' => 'required|string|max:255',
-            'subject' => 'required|string',
+            'subject' => 'required|string|max:1000',
             'sequence_number' => 'required|integer|min:1',
         ]);
 
@@ -68,7 +76,7 @@ class LetterController extends Controller
             'classification_id' => 'required|exists:classifications,id',
             'sub_classification_id' => 'required|exists:sub_classifications,id',
             'recipient' => 'required|string|max:255',
-            'subject' => 'required|string',
+            'subject' => 'required|string|max:1000',
             'sequence_number' => 'required|integer|min:1',
         ]);
 

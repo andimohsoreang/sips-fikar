@@ -17,9 +17,23 @@ import {
 } from 'lucide-react';
 
 export default function SupabaseLayout({ user, header, children }) {
-    const { flash } = usePage().props;
+    const { flash, ziggy } = usePage().props;
+    const currentUrl = ziggy?.location || window.location.href;
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showToast, setShowToast] = useState(false);
+
+    // Checks if a nav item's href matches the current page URL
+    const isActive = (href) => {
+        try {
+            const hrefPath = new URL(href).pathname;
+            const currentPath = new URL(currentUrl).pathname;
+            // Exact match for dashboard, prefix match for others
+            if (hrefPath === '/dashboard') return currentPath === '/dashboard';
+            return currentPath.startsWith(hrefPath);
+        } catch {
+            return false;
+        }
+    };
 
     useEffect(() => {
         if (flash?.success || flash?.error) {
@@ -82,7 +96,7 @@ export default function SupabaseLayout({ user, header, children }) {
                                             key={item.name}
                                             href={item.href}
                                             className={`flex items-center px-3 py-1.5 text-[13px] rounded-md transition-colors group ${
-                                                route().current(item.href.split('/').pop() + '*') 
+                                                isActive(item.href)
                                                 ? 'bg-supabase-brand/10 text-supabase-brand font-medium' 
                                                 : 'text-supabase-subtext hover:bg-supabase-panel hover:text-supabase-text'
                                             }`}

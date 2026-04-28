@@ -13,9 +13,13 @@ export default function SupabaseTable({
     const [currentPage, setCurrentPage] = useState(1);
     const [bidangFilter, setBidangFilter] = useState('all');
 
+    const isBackendPaginated = data && typeof data === 'object' && !Array.isArray(data) && 'data' in data && 'links' in data;
+    const actualData = isBackendPaginated ? data.data : (data || []);
+    const safeData = Array.isArray(actualData) ? actualData : [];
+
     // Filter logic
     const filteredData = useMemo(() => {
-        let result = data;
+        let result = safeData;
 
         // Apply Bidang Filter
         if (bidangFilter !== 'all') {
@@ -32,14 +36,17 @@ export default function SupabaseTable({
         }
         
         return result;
-    }, [data, searchQuery, bidangFilter]);
+    }, [safeData, searchQuery, bidangFilter]);
 
     // Pagination logic
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const paginatedData = useMemo(() => {
+        if (isBackendPaginated && !searchQuery && bidangFilter === 'all') {
+            return safeData; // If using backend pagination and no client filters, display all returned by backend
+        }
         const start = (currentPage - 1) * itemsPerPage;
         return filteredData.slice(start, start + itemsPerPage);
-    }, [filteredData, currentPage, itemsPerPage]);
+    }, [filteredData, currentPage, itemsPerPage, isBackendPaginated, safeData, searchQuery, bidangFilter]);
 
     // Handle search change
     const handleSearch = (e) => {
@@ -53,7 +60,7 @@ export default function SupabaseTable({
             <div className="flex flex-col space-y-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Bidang Switcher (Pills) */}
-                    {data.length > 0 && data[0].hasOwnProperty('department') && (
+                    {safeData.length > 0 && safeData[0].hasOwnProperty('department') && (
                         <div className="flex items-center p-1 bg-slate-100 rounded-xl w-fit shrink-0">
                             <button
                                 onClick={() => {
@@ -68,7 +75,7 @@ export default function SupabaseTable({
                             >
                                 Semua Bidang
                             </button>
-                            {departments.map((dept) => (
+                            {departments && departments.map((dept) => (
                                 <button
                                     key={dept.id}
                                     onClick={() => {
@@ -88,7 +95,9 @@ export default function SupabaseTable({
                     )}
 
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-                        {paginatedData.length} dari {filteredData.length} hasil
+                        {isBackendPaginated && !searchQuery && bidangFilter === 'all' 
+                            ? `Total ${data.total} hasil` 
+                            : `${paginatedData.length} dari ${filteredData.length} hasil`}
                     </div>
                 </div>
 
@@ -145,8 +154,27 @@ export default function SupabaseTable({
                     </tbody>
                 </table>
 
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
+                {/* Backend Pagination Links */}
+                {isBackendPaginated && !searchQuery && bidangFilter === 'all' && data.links && data.links.length > 3 && (
+                    <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <div className="flex flex-wrap items-center gap-1">
+                            {data.links.map((link, key) => (
+                                link.url === null ? (
+                                    <div key={key} className="p-2 px-3 text-slate-400 rounded-lg border border-transparent opacity-50 text-xs font-bold" dangerouslySetInnerHTML={{ __html: link.label }} />
+                                ) : (
+                                    <a key={key} href={link.url} className={`p-2 px-3 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                                        link.active 
+                                        ? 'bg-supabase-brand text-white shadow-sm' 
+                                        : 'text-slate-500 hover:bg-white hover:border-slate-200 border border-transparent'
+                                    }`} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                )
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Frontend Pagination Controls (fallback) */}
+                {(!isBackendPaginated || searchQuery || bidangFilter !== 'all') && totalPages > 1 && (
                     <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <button 
