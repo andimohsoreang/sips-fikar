@@ -17,6 +17,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/letters/export/excel', [\App\Http\Controllers\LetterController::class, 'exportExcel'])->name('letters.export-excel');
     Route::resource('letters', \App\Http\Controllers\LetterController::class);
     Route::resource('document-types', \App\Http\Controllers\DocumentTypeController::class);
     Route::resource('classifications', \App\Http\Controllers\ClassificationController::class);

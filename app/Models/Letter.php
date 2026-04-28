@@ -37,4 +37,9 @@ class Letter extends Model
     {
         return $this->belongsTo(SubClassification::class);
     }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
 }

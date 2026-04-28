@@ -90,4 +90,9 @@ class LetterController extends Controller
 
         return redirect()->route('letters.index')->with('success', 'Nomor surat berhasil dihapus.');
     }
+
+    public function exportExcel()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LettersExport, 'SIPS_Offline_Tracker.xlsx');
+    }
 }

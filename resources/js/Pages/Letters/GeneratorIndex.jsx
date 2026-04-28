@@ -31,7 +31,21 @@ export default function GeneratorIndex({ auth, letters }) {
             header: 'Nomor Surat',
             cell: (row) => (
                 <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 font-mono tracking-tight">{row.full_number}</span>
+                    <div className="flex items-center space-x-2 group">
+                        <span className="font-bold text-slate-900 font-mono tracking-tight">{row.full_number}</span>
+                        <button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(row.full_number);
+                            }}
+                            title="Copy Nomor Surat"
+                            className="p-1 text-slate-300 opacity-0 group-hover:opacity-100 hover:text-supabase-brand hover:bg-supabase-brand/10 rounded transition-all"
+                        >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <span className="text-[10px] text-slate-400 flex items-center mt-0.5">
                         <Calendar className="w-3 h-3 mr-1" />
                         {new Date(row.letter_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}

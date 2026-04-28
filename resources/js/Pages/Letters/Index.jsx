@@ -114,7 +114,22 @@ export default function Index({ auth, letters, documentTypes, classifications, s
             header: 'Nomor Surat',
             cell: (row) => (
                 <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 font-mono tracking-tight">{row.full_number}</span>
+                    <div className="flex items-center space-x-2 group">
+                        <span className="font-bold text-slate-900 font-mono tracking-tight">{row.full_number}</span>
+                        <button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(row.full_number);
+                                // Optional visual feedback can be added here
+                            }}
+                            title="Copy Nomor Surat"
+                            className="p-1 text-slate-300 opacity-0 group-hover:opacity-100 hover:text-supabase-brand hover:bg-supabase-brand/10 rounded transition-all"
+                        >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <span className="text-[10px] text-slate-400 flex items-center mt-0.5">
                         <Calendar className="w-3 h-3 mr-1" />
                         {new Date(row.letter_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -175,13 +190,28 @@ export default function Index({ auth, letters, documentTypes, classifications, s
                         <h2 className="text-xl font-bold text-slate-900 tracking-tight">Arsip Penomoran Surat</h2>
                         <p className="text-sm text-slate-500 mt-1">Kelola dan pantau seluruh penomoran surat secara real-time.</p>
                     </div>
-                    <button 
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center px-6 py-2.5 text-sm font-bold text-white bg-supabase-brand rounded-xl hover:bg-supabase-brand-hover transition-all shadow-sm hover:shadow-lg"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Registrasi Surat Baru
-                    </button>
+                    <div className="flex items-center space-x-3">
+                        <a 
+                            href={route('letters.export-excel')}
+                            className="flex items-center px-5 py-2.5 text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-all shadow-sm"
+                        >
+                            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="8" y1="13" x2="16" y2="13"></line>
+                                <line x1="8" y1="17" x2="16" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Export Excel (Offline Tracker)
+                        </a>
+                        <button 
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="flex items-center px-6 py-2.5 text-sm font-bold text-white bg-supabase-brand rounded-xl hover:bg-supabase-brand-hover transition-all shadow-sm hover:shadow-lg"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Registrasi Surat Baru
+                        </button>
+                    </div>
                 </div>
 
                 <SupabaseTable 
